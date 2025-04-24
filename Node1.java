@@ -1,9 +1,14 @@
-public class Node1 {
-    String value;
-    Node1 next;
+class Node1 {
+    String processName;
+    int burstTime;
+    int remainingTime;
+    Node next;
 
-    public Node1(String value) {
-        this.value = value;
+    public Node1(String processName, int burstTime) {
+        this.processName = processName;
+        this.burstTime = burstTime;
+        this.remainingTime = burstTime;
         this.next = null;
     }
 }
+

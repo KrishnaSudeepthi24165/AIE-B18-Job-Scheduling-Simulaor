@@ -1,23 +1,33 @@
-public class PriorityQueue {
-    LinkedList list;
+class PriorityQueue {
+    private LinkedList linkedList;
 
     public PriorityQueue() {
-        list = new LinkedList();
+        linkedList = new LinkedList();
     }
 
-    public void insert(String jobName, int priority) {
-        list.insert(jobName, priority);
+    public void insert(String data, int priority) {
+        linkedList.insert(data, priority);
     }
 
     public String delete() {
-        return list.removeFirst();
+        return linkedList.removeFirst();
     }
 
     public void display() {
-        list.display();
+        linkedList.display();
     }
 
-    public void updatePriority(String jobName, int newPriority) {
-        list.updatePriority(jobName, newPriority);
+    public static void main(String[] args) {
+        PriorityQueue pq = new PriorityQueue();
+        pq.insert("Task1", 2);
+        pq.insert("Task2", 1);
+        pq.insert("Task3", 3);
+        pq.insert("Task4", 0);
+        pq.insert("Task5", 2);
+
+        pq.display();
+
+        System.out.println("Deleted: " + pq.delete());
+        pq.display();
     }
 }

@@ -1,12 +1,14 @@
-public class LinkedList {
-    Node head;
+class LinkedList {
+    private Node head;
 
+    // Check if the queue is empty
     public boolean isEmpty() {
         return head == null;
     }
 
-    public void insert(String jobName, int priority) {
-        Node newNode = new Node(jobName, priority);
+    // Insert element based on priority (higher priority first)
+    public void insert(String data, int priority) {
+        Node newNode = new Node(data, priority);
         if (isEmpty() || head.priority < priority) {
             newNode.next = head;
             head = newNode;
@@ -20,42 +22,27 @@ public class LinkedList {
         }
     }
 
+    // Remove highest priority element (head of list)
     public String removeFirst() {
-        if (isEmpty()) return null;
-        String job = head.jobName;
-        head = head.next;
-        return job;
-    }
-
-    public void updatePriority(String jobName, int newPriority) {
-        Node temp = head;
-        Node prev = null;
-        while (temp != null) {
-            if (temp.jobName.equals(jobName)) {
-                if (temp.priority != newPriority) {
-                    if (prev != null) {
-                        prev.next = temp.next;
-                    } else {
-                        head = temp.next;
-                    }
-                    insert(jobName, newPriority);
-                }
-                return;
-            }
-            prev = temp;
-            temp = temp.next;
+        if (isEmpty()) {
+            System.out.println("Queue is empty!");
+            return null;
         }
+        String removedData = head.data;
+        head = head.next;
+        return removedData;
     }
 
+    // Display queue
     public void display() {
         if (isEmpty()) {
-            System.out.println("Job queue is empty.");
+            System.out.println("Queue is empty!");
             return;
         }
-        System.out.println("Job Queue (Job Name -> Priority):");
         Node temp = head;
+        System.out.println("Priority Queue:");
         while (temp != null) {
-            System.out.println(temp.jobName + " -> Priority " + temp.priority);
+            System.out.println("Data: " + temp.data + ", Priority: " + temp.priority);
             temp = temp.next;
         }
     }

@@ -1,10 +1,10 @@
-public class Node {
-    String jobName;
+class Node {
+    String data;
     int priority;
     Node next;
 
-    public Node(String jobName, int priority) {
-        this.jobName = jobName;
+    public Node(String data, int priority) {
+        this.data = data;
         this.priority = priority;
         this.next = null;
     }

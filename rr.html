@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Round Robin Job Scheduler</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f0f2f5;
+      padding: 2rem;
+      margin: 0;
+    }
+    .main {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    .form {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+    }
+    .form input {
+      flex: 1 1 30%;
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      min-width: 200px;
+    }
+    .buttons {
+      width: 100%;
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    button {
+      flex: 1;
+      background-color: #007bff;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .container {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .panel {
+      flex: 1 1 30%;
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      min-width: 280px;
+    }
+    .panel h2 {
+      color: #444;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    li {
+      background-color: #f9f9f9;
+      border-left: 5px solid #007bff;
+      margin-bottom: 0.7rem;
+      padding: 0.7rem 1rem;
+      border-radius: 6px;
+    }
+    .executing li {
+      border-left-color: #ffc107;
+    }
+    .completed li {
+      border-left-color: #28a745;
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <h1>Round Robin Job Scheduler</h1>
+    <div class="form">
+      <input type="text" id="jobId" placeholder="Job ID">
+      <input type="number" id="execTime" placeholder="Execution Time (s)">
+      <div class="buttons">
+        <button onclick="addJob()">Add Job</button>
+        <button onclick="executeJobs()">Execute Jobs</button>
+      </div>
+    </div>
+    <div class="container">
+      <div class="panel pending">
+        <h2>Pending Jobs</h2>
+        <ul id="pendingJobs"></ul>
+      </div>
+      <div class="panel executing">
+        <h2>Executing Jobs</h2>
+        <ul id="executingJobs"></ul>
+      </div>
+      <div class="panel completed">
+        <h2>Completed Jobs</h2>
+        <ul id="completedJobs"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const timeQuantum = 5;
+    const pending = [];
+    const completed = [];
+
+    function addJob() {
+      const id = document.getElementById("jobId").value.trim();
+      const time = parseInt(document.getElementById("execTime").value);
+
+      if (!id || isNaN(time) || time <= 0) {
+        alert("Enter valid Job ID and Execution Time");
+        return;
+      }
+
+      pending.push({ id, execTime: time, remaining: time });
+      document.getElementById("jobId").value = "";
+      document.getElementById("execTime").value = "";
+      renderJobs();
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function executeJobs() {
+      const executingUl = document.getElementById("executingJobs");
+      executingUl.innerHTML = "";
+
+      // Round Robin Scheduling Logic
+      while (pending.length > 0) {
+        let job = pending.shift(); // Get the first job in the queue
+
+        // Execute the job for a time quantum
+        const execTime = Math.min(timeQuantum, job.remaining);
+        job.remaining -= execTime;
+
+        // Update the executing list
+        executingUl.innerHTML = `<li>${job.id} running for ${execTime}s | Remaining: ${job.remaining}</li>`;
+        await sleep(execTime * 1000); // Simulate the execution time for the quantum
+
+        // If job is not completed, re-add it to the end of the queue
+        if (job.remaining > 0) {
+          pending.push(job);
+        } else {
+          completed.push(job);
+        }
+
+        // Clear the executing list and re-render all jobs
+        executingUl.innerHTML = "";
+        renderJobs();
+      }
+    }
+
+    function renderJobs() {
+      const pendingUl = document.getElementById("pendingJobs");
+      const completedUl = document.getElementById("completedJobs");
+      pendingUl.innerHTML = "";
+      completedUl.innerHTML = "";
+
+      pending.forEach(job => {
+        const li = document.createElement("li");
+        li.textContent = `${job.id} (${job.remaining}s remaining)`;
+        pendingUl.appendChild(li);
+      });
+
+      completed.forEach(job => {
+        const li = document.createElement("li");
+        li.textContent = `${job.id} (Done)`;
+        completedUl.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>

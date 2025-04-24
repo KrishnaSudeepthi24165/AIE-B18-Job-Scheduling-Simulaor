@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FIFO Job Scheduler</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .job-form {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    input {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 150px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .section {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .list {
+      flex: 1;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .list h2 {
+      text-align: center;
+      color: #555;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #f0f0f0;
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      border-left: 5px solid #4CAF50;
+      border-radius: 4px;
+    }
+
+    .executing {
+      background-color: #ffeb3b !important;
+      border-left-color: #fbc02d !important;
+    }
+
+    .completed {
+      background-color: #d0f0c0 !important;
+      border-left-color: #388e3c !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>FIFO Job Scheduler</h1>
+
+    <div class="job-form">
+      <input type="text" id="jobId" placeholder="Job ID" />
+      <input type="number" id="execTime" placeholder="Execution Time (s)" min="1" />
+      <button onclick="addJob()">Add Job</button>
+      <button onclick="executeAllJobs()">Execute All Jobs</button>
+    </div>
+
+    <div class="section">
+      <div class="list">
+        <h2>Pending Jobs</h2>
+        <ul id="pendingList"></ul>
+      </div>
+      <div class="list">
+        <h2>Completed Jobs</h2>
+        <ul id="completedList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let jobQueue = [];
+
+    function addJob() {
+      const jobId = document.getElementById('jobId').value.trim();
+      const execTime = parseInt(document.getElementById('execTime').value);
+
+      if (!jobId || !execTime || execTime < 1) {
+        alert("Please enter a valid Job ID and execution time.");
+        return;
+      }
+
+      const job = {
+        id: jobId,
+        execTime: execTime,
+        remaining: execTime
+      };
+
+      jobQueue.push(job);
+      renderJobs();
+
+      document.getElementById('jobId').value = '';
+      document.getElementById('execTime').value = '';
+    }
+
+    function renderJobs() {
+      const pendingList = document.getElementById('pendingList');
+      const completedList = document.getElementById('completedList');
+      pendingList.innerHTML = '';
+      completedList.innerHTML = '';
+
+      for (const job of jobQueue) {
+        const li = document.createElement('li');
+        li.textContent = `Job ID: ${job.id} | Time: ${job.execTime}s`;
+
+        if (job.remaining > 0) {
+          pendingList.appendChild(li);
+        } else {
+          li.classList.add("completed");
+          completedList.appendChild(li);
+        }
+      }
+    }
+
+    async function executeAllJobs() {
+      const pendingList = document.getElementById('pendingList');
+
+      for (let i = 0; i < jobQueue.length; i++) {
+        let job = jobQueue[i];
+
+        if (job.remaining > 0) {
+          renderJobs();
+
+          const currentLi = pendingList.children[0];
+          currentLi.classList.add("executing");
+          currentLi.textContent += " - Executing...";
+
+          await new Promise(resolve => setTimeout(resolve, job.execTime * 1000));
+          job.remaining = 0;
+
+          renderJobs(); // refresh list to show it moved to completed
+        }
+      }
+
+      alert("✅ All jobs executed!");
+    }
+  </script>
+</body>
+</html>
